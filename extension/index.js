@@ -1,5 +1,7 @@
 const EventEmitter = require("events");
 const io = require("socket.io-client");
+const util = require('./util');
+const request = require("request");
 
 module.exports = nodecg => {
     if(!nodecg.bundleConfig) {
@@ -9,7 +11,6 @@ module.exports = nodecg => {
         nodecg.log.error("No socket_token value present in bundleConfig, nodecg-streamlabs will not work without a socket_token. Exiting");
         return;
     }
-
 
     // XXX This is a temporary fix to stop nodecg from crashing whenever we hit an unexpected event
     // It's not perfect, and will probably be changed/removed in the future.
@@ -36,6 +37,20 @@ module.exports = nodecg => {
     let socket = io.connect(`https://sockets.streamlabs.com/?token=${nodecg.bundleConfig.socket_token}`, opts);
     let emitter = new EventEmitter();
     let history = require("./history")(nodecg);
+
+		// store tops for daily and monthly like lfg-streamtip
+		const tops = nodecg.Replicant('streamlabs_tops', {defaultValue: {monthly: {formatted_amount: "$0", amount:0, name: "N/A"}, daily: {formatted_amount: "$0", amount:0, name: "N/A"}}});
+		const access = nodecg.bundleConfig.access_token;
+		// Get what Streamlabs believes is current tops, overwrite our own only if they are larger
+		// Reason for this is streams may run over the 'day' boundary, and we don't want to lose current top
+		// if NodeCG should be restarted
+		// util.queryTops(request, access, nodecg.log, stTops => {
+		// 	Object.keys(tops.value).forEach(period => {
+		// 		if (stTops[period] !== null && stTops[period] * 100 > tops.value[period] * 100) {
+		// 			tops.value[period] = stTops[period];
+		// 		}
+		// 	});
+		// });
 
     socket.on("event", event => {
         // For people who wanna handle some of the dirty work themselves
@@ -71,12 +86,23 @@ module.exports = nodecg => {
                     type: "donation",
                     message
                 };
+								// tops
+								const newTops = util.compareTops(message, tops.value);
+								let top = null;
+								Object.keys(newTops).forEach(period => {
+									if (newTops[period] !== null) {
+										tops.value[period] = newTops[period];
+										top = top ? top : period; // Don't touch top if it's already set
+									}
+								});
+								message.top = top;
                 nodecg.sendMessage("donation", message);
                 emitter.emit("donation", message);
 
                 nodecg.sendMessage("streamlabs-event", type_message);
                 emitter.emit("streamlabs-event", type_message);
                 history.add(type_message);
+
                 break;
             }
             case "follow": {
@@ -221,6 +247,10 @@ module.exports = nodecg => {
                 break;
         }
     });
+		emitter.resetPeriod = function (period) {
+			tops.value[period] = {};
+		};
 
+		nodecg.listenFor('streamlabs_resetPeriod', emitter.resetPeriod);
     return emitter;
 };

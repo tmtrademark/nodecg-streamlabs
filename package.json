@@ -1,19 +1,63 @@
 {
-    "name": "nodecg-streamlabs",
-    "version": "0.1.1",
-    "author": "Karen West <atribecalledkwest.97@gmail.com>",
-    "description": "NodeCG bundle that exposes the StreamLabs streaming API to other NodeCG bundles.",
-    "scripts": {
-        "test": "eslint extension/**/*.js"
-    },
-    "license": "SEE LICENSE IN <LICENSE>",
-    "nodecg": {
-        "compatibleRange": "~0.8.9"
-    },
-    "devDependencies": {
-        "eslint": "^4.7.1"
-    },
-    "dependencies": {
-        "socket.io-client": "^2.0.3"
-    }
+	"name": "nodecg-streamlabs",
+	"version": "0.1.1",
+	"author": "Karen West <atribecalledkwest.97@gmail.com>",
+	"description": "NodeCG bundle that exposes the StreamLabs streaming API to other NodeCG bundles.",
+	"scripts": {
+		"test": "eslint extension/**/*.js"
+	},
+	"license": "SEE LICENSE IN <LICENSE>",
+	"nodecg": {
+		"compatibleRange": "~0.8.9",
+		"dashboardPanels": [
+			{
+				"name": "tip-stats",
+				"title": "StreamLabs Tip Stats",
+				"width": 2,
+				"headerColor": "#31c3a2",
+				"file": "panel.html"
+			},
+			{
+				"name": "reset-daily",
+				"title": "Reset Daily",
+				"width": 3,
+				"file": "reset-daily.html",
+				"dialog": true,
+				"dialogButtons": [
+					{
+						"name": "Yes, reset",
+						"type": "confirm"
+					},
+					{
+						"name": "No, do not reset",
+						"type": "dismiss"
+					}
+				]
+			},
+			{
+				"name": "reset-monthly",
+				"title": "Reset Monthly",
+				"width": 3,
+				"file": "reset-monthly.html",
+				"dialog": true,
+				"dialogButtons": [
+					{
+						"name": "Yes, reset",
+						"type": "confirm"
+					},
+					{
+						"name": "No, do not reset",
+						"type": "dismiss"
+					}
+				]
+			}
+		]
+	},
+	"devDependencies": {
+		"eslint": "^4.7.1"
+	},
+	"dependencies": {
+		"socket.io-client": "^2.0.3",
+		"streamlabs": "1.3.4"
+	}
 }
