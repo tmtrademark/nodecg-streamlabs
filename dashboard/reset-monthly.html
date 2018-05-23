@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<p>
+		"Monthly" and "Daily" are not automatically determined. They only reset when you explicitly tell them to.
+	</p>
+
+	<p>
+		Are you sure you wish to reset monthly top donator?
+	</p>
+
+	<script>
+		(function () {
+			document.addEventListener('dialog-confirmed', () => {
+				nodecg.sendMessage('streamlabs_resetPeriod', 'monthly');
+			});
+		})();
+	</script>
+</body>
+</html>
